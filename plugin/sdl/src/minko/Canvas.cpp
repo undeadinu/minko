@@ -187,8 +187,8 @@ Canvas::initializeWindow()
         height(h);
     }
 
-    _audio = SDLAudio::create(shared_from_this());
 #endif
+    _audio = SDLAudio::create(shared_from_this());
 }
 
 void*
