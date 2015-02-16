@@ -63,11 +63,15 @@ WebVROculus::initializeOVRDevice(void* window)
     _leftRenderer->viewport(0, 0, 960, 1080);
     _rightRenderer->viewport(960, 0, 960, 1080);
 
+    std::cout << "Info: initializeOVRDevice()" << std::endl;
+
     std::string eval = "";
 
     eval += "function vrDeviceCallback(vrdevs) {                             \n";
     eval += "    for (var i = 0; i < vrdevs.length; ++i) {                   \n";
     eval += "        if (vrdevs[i] instanceof HMDVRDevice) {                 \n";
+    eval += "            console.log('Info: Add a new HMDVRDevice.');        \n";
+    eval += "            console.log(vrdevs[i]);                             \n";
     eval += "            vrHMD = vrdevs[i];                                  \n";
     eval += "            break;                                              \n";
     eval += "        }                                                       \n";
@@ -75,6 +79,8 @@ WebVROculus::initializeOVRDevice(void* window)
     eval += "    for (var i = 0; i < vrdevs.length; ++i) {                   \n";
     eval += "        if (vrdevs[i] instanceof PositionSensorVRDevice &&      \n";
     eval += "            vrdevs[i].hardwareUnitId == vrHMD.hardwareUnitId) { \n";
+    eval += "            console.log('Info: Add a new PositionSensorVRDevice.');        \n";
+    eval += "            console.log(vrdevs[i]);                             \n";
     eval += "            window.vrHMDSensor = vrdevs[i];                     \n";
     eval += "            break;                                              \n";
     eval += "        }                                                       \n";
@@ -97,7 +103,11 @@ WebVROculus::initializeOVRDevice(void* window)
     eval += "}, false);                                                      \n";
     eval += "                                                                \n";
     eval += "if (navigator.getVRDevices !== undefined) {                     \n";
+    eval += "   console.log('Info: navigator.getVRDevices().then(vrDeviceCallback)');\n";
     eval += "    navigator.getVRDevices().then(vrDeviceCallback);            \n";
+    eval += "}                                                               \n";
+    eval += "else {                                                          \n";
+    eval += "   console.log('VR devices are not supported by your navigator!');\n";
     eval += "}                                                               \n";
 
 
@@ -166,9 +176,15 @@ WebVROculus::updateCameraOrientation(scene::Node::Ptr target)
         auto result = emscripten_run_script_int(checkVrHDM.c_str());
 
         if (result == 0)
+        {
+            std::cout << "VRDevice not detected!" << std::endl;
             return;
+        }
         else
+        {
             _initialized = true;
+            std::cout << "VRDevice detected!" << std::endl;
+        }
     }
 
     std::string eval = "if (window.vrHMDSensor.getState().orientation != null) { window.vrHMDSensor.getState().orientation.x + ' ' + window.vrHMDSensor.getState().orientation.y + ' ' + window.vrHMDSensor.getState().orientation.z + ' ' + window.vrHMDSensor.getState().orientation.w; }\n";
@@ -191,6 +207,10 @@ WebVROculus::updateCameraOrientation(scene::Node::Ptr target)
         auto matrix = quaternion->toMatrix();
         target->component<Transform>()->matrix()->copyFrom(matrix);
     }
+    else
+    {
+        //std::cout << "VR device orientation is null!" << std::endl;
+    }
 
     // Get position tracking
     eval = "if (window.vrHMDSensor.getState().position != null) { window.vrHMDSensor.getState().position.x + ' ' + window.vrHMDSensor.getState().position.y + ' ' + window.vrHMDSensor.getState().position.z; }\n";
@@ -206,6 +226,10 @@ WebVROculus::updateCameraOrientation(scene::Node::Ptr target)
         ssPosition >> position[2];
 
         target->component<Transform>()->matrix()->appendTranslation(position[0], position[1], position[2]);
+    }
+    else
+    {
+        //std::cout << "VR device position is null!" << std::endl;
     }
 }
 
