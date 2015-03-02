@@ -204,7 +204,7 @@ minko.project.application = function(name)
 		}
 
 		-- enable the closure compiler
-		cmd = cmd .. ' --closure 1 -s CLOSURE_ANNOTATIONS=1'
+		cmd = cmd .. ' --closure 0 -s CLOSURE_ANNOTATIONS=1'
 		-- treat undefined symbol warnings as errors
 		cmd = cmd .. ' -s ERROR_ON_UNDEFINED_SYMBOLS=1'
 		-- disable exception catching
